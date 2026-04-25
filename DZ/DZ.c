@@ -2,9 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct {
-    int u, v;
-} Edge;
+struct Edge {
+    int u;
+    int v;
+};
 
 int main() {
     setlocale(LC_ALL, "RU");
@@ -18,12 +19,17 @@ int main() {
     fscanf(f, "%d %d", &n, &m);
 
     int inc[100][100];
-    for (int i = 0; i < n; i++)
-        for (int j = 0; j < m; j++)
+    printf("Матрица инцидентности (%d x %d):\n", n, m);
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
             fscanf(f, "%d", &inc[i][j]);
+            printf("%d ", inc[i][j]);
+        }
+        printf("\n");
+    }
     fclose(f);
 
-    Edge edges[100];
+    struct Edge edges[100];
     for (int j = 0; j < m; j++) {
         int v1 = -1, v2 = -1;
         for (int i = 0; i < n; i++) {
@@ -36,7 +42,7 @@ int main() {
         edges[j].v = (v2 == -1) ? v1 : v2;
     }
 
-    printf("Список рёбер:\n");
+    printf("\nСписок рёбер:\n");
     for (int j = 0; j < m; j++)
         printf("V%d -- V%d\n", edges[j].u + 1, edges[j].v + 1);
 
