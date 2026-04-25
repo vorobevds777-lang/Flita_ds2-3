@@ -1,0 +1,80 @@
+#include <locale.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct {
+    int u, v;
+} Edge;
+
+int main() {
+    setlocale(LC_ALL, "RU");
+    FILE *f = fopen("graph.txt", "r");
+    if (!f) {
+        printf("Файл graph.txt не найден\n");
+        return 1;
+    }
+
+    int n, m;
+    fscanf(f, "%d %d", &n, &m);
+
+    int inc[100][100];
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < m; j++)
+            fscanf(f, "%d", &inc[i][j]);
+    fclose(f);
+
+    Edge edges[100];
+    for (int j = 0; j < m; j++) {
+        int v1 = -1, v2 = -1;
+        for (int i = 0; i < n; i++) {
+            if (inc[i][j]) {
+                if (v1 == -1) v1 = i;
+                else v2 = i;
+            }
+        }
+        edges[j].u = v1;
+        edges[j].v = (v2 == -1) ? v1 : v2;
+    }
+
+    printf("Список рёбер:\n");
+    for (int j = 0; j < m; j++)
+        printf("V%d -- V%d\n", edges[j].u + 1, edges[j].v + 1);
+
+    int visited[100] = {0};
+    int adj[100][100] = {{0}};
+    for (int j = 0; j < m; j++) {
+        adj[edges[j].u][edges[j].v] = 1;
+        adj[edges[j].v][edges[j].u] = 1;
+    }
+
+    int stack[100], top = -1;
+    stack[++top] = 0;
+    visited[0] = 1;
+    while (top >= 0) {
+        int v = stack[top--];
+        for (int i = 0; i < n; i++)
+            if (adj[v][i] && !visited[i]) {
+                visited[i] = 1;
+                stack[++top] = i;
+            }
+    }
+
+    int connected = 1;
+    for (int i = 0; i < n; i++)
+        if (!visited[i]) connected = 0;
+
+    printf("\nГраф %s связный\n", connected ? "" : "НЕ");
+
+    FILE *dot = fopen("graph.dot", "w");
+    if (dot != NULL) {
+        fprintf(dot, "graph G {\n");
+        for (int j = 0; j < m; j++)
+            fprintf(dot, "  V%d -- V%d\n", edges[j].u + 1, edges[j].v + 1);
+        fprintf(dot, "}\n");
+        fclose(dot);
+        printf("\nСоздан файл graph.dot для визуализации\n");
+        printf("Чтобы увидеть граф, выполните: dot -Tpng graph.dot -o graph.png\n");
+    }
+
+    return 0;
+}
